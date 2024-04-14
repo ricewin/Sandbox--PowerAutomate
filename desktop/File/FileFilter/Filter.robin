@@ -1,0 +1,37 @@
+
+FUNCTION Filter GLOBAL
+    CALL Now
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Move process.''' Result=> Log
+    Folder.GetFiles Folder: WatchDirectory FileFilter: FileNameFilter IncludeSubfolders: False FailOnAccessDenied: True SortBy1: Folder.SortBy.NoSort SortDescending1: False SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Files=> Files
+    ON ERROR FolderNotFoundError
+        SET ErrorMsg TO $'''%WatchDirectory%が存在しません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR RetrieveFilesError
+        SET ErrorMsg TO $'''ファイルの一覧を取得できません。'''
+        CALL Catch
+        THROW ERROR
+    END
+    LOOP FOREACH 対象ファイル IN Files
+        **REGION 比較
+        LOOP FOREACH 比較リスト IN filtering.filters
+            IF Contains(対象ファイル.Name, 比較リスト.text, True) THEN
+                EXIT LOOP
+            END
+        END
+        **ENDREGION
+        CALL Now
+        Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO %対象ファイル.NameWithoutExtension% ⇒ %MoveDestDir%%比較リスト.storeDir%''' Result=> Log
+        File.Move Files: 対象ファイル Destination: $'''%MoveDestDir%%比較リスト.storeDir%''' IfFileExists: File.IfExists.DoNothing
+        ON ERROR REPEAT 1 TIMES WAIT 20
+        ON ERROR InvalidDestinationFolderError
+            SET ErrorMsg TO $'''%MoveDestDir%%比較リスト.storeDir%が存在しません。'''
+            CALL Catch
+            THROW ERROR
+        ON ERROR MoveFileError
+            SET ErrorMsg TO $'''%対象ファイル.Name%を移動できません。'''
+            CALL Catch
+            THROW ERROR
+        END
+    END
+END FUNCTION

@@ -1,0 +1,11 @@
+{
+    "AppSettings": {
+        "StrategyFile": "\\filter.json",
+        "StoreLog": "\\fslog.txt",
+        "WatchDirectory": "D:\\_move",
+        "CopyAutoDestDir": "\\\\192.168.xxx.xxx\\_put",
+        "CopyFilterDestDir": "D:\\xxx\\xxx",
+        "MoveDestDir": "F:\\VIDEO\\xxx",
+        "FileNameFilter": "*.mp4"
+    }
+}

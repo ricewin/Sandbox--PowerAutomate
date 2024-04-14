@@ -1,0 +1,56 @@
+
+FUNCTION Init GLOBAL
+    **REGION 設定ファイル
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Check config.''' Result=> Log
+    File.ReadTextFromFile.ReadTextAsList File: AppConfig Encoding: File.TextFileEncoding.UTF8 Contents=> FileContents
+    ON ERROR DirectoryNotFoundError
+        SET ErrorMsg TO $'''ディレクトリが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR FileNotFoundError
+        SET ErrorMsg TO $'''ファイルが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR ReadFromFileError
+        SET ErrorMsg TO $'''ファイルを読み取れませんでした。'''
+        CALL Catch
+        THROW ERROR
+    END
+    Variables.ConvertJsonToCustomObject Json: FileContents CustomObject=> Settings
+    ON ERROR ParseJsonError
+        SET ErrorMsg TO $'''構文エラーです。'''
+        CALL Catch
+        THROW ERROR
+    END
+    SET StrategyFile TO $'''%BaseDir%%Settings['AppSettings']['StrategyFile']%'''
+    SET StoreLog TO $'''%BaseDir%%Settings['AppSettings']['StoreLog']%'''
+    SET WatchDirectory TO Settings['AppSettings']['WatchDirectory']
+    SET MoveDestDir TO Settings['AppSettings']['MoveDestDir']
+    SET FileNameFilter TO Settings['AppSettings']['FileNameFilter']
+    **ENDREGION
+    **REGION フィルターリスト
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Check filter list.''' Result=> Log
+    SET settingsFile TO StrategyFile
+    File.ReadTextFromFile.ReadText File: settingsFile Encoding: File.TextFileEncoding.UTF8 Content=> FileContents
+    ON ERROR DirectoryNotFoundError
+        SET ErrorMsg TO $'''ディレクトリが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR FileNotFoundError
+        SET ErrorMsg TO $'''ファイルが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR ReadFromFileError
+        SET ErrorMsg TO $'''ファイルを読み取れませんでした。'''
+        CALL Catch
+        THROW ERROR
+    END
+    Variables.ConvertJsonToCustomObject Json: FileContents CustomObject=> filtering
+    ON ERROR ParseJsonError
+        SET ErrorMsg TO $'''構文エラーです。'''
+        CALL Catch
+        THROW ERROR
+    END
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Check OK.''' Result=> Log
+    **ENDREGION
+END FUNCTION

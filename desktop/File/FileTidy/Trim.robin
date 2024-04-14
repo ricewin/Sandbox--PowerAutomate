@@ -1,0 +1,21 @@
+
+FUNCTION Trim GLOBAL
+    Text.ParseText.ParseForFirstOccurrence Text: 対象ファイル TextToFind: $'''_''' StartingPosition: 0 IgnoreCase: True OccurrencePosition=> Position
+    IF Position >= 0 THEN
+        Text.CropText.CropTextBetweenFlags Text: 対象ファイル FromFlag: $'''_''' ToFlag: $'''_''' IgnoreCase: True CroppedText=> 対象ファイル
+    END
+    Text.ParseText.ParseForFirstOccurrence Text: 対象ファイル TextToFind: $'''#''' StartingPosition: 0 IgnoreCase: True OccurrencePosition=> Position
+    IF Position >= 0 THEN
+        Text.CropText.CropTextBeforeFlag Text: 対象ファイル ToFlag: $'''#''' IgnoreCase: True CroppedText=> 対象ファイル
+    END
+    Text.ParseText.RegexParseForFirstOccurrence Text: 対象ファイル TextToFind: $'''第*話''' StartingPosition: 0 IgnoreCase: False OccurrencePosition=> Position
+    IF Position >= 0 THEN
+        Text.CropText.CropTextBeforeFlag Text: 対象ファイル ToFlag: $'''第''' IgnoreCase: True CroppedText=> 対象ファイル
+    END
+    Text.ParseText.RegexParseForFirstOccurrence Text: 対象ファイル TextToFind: $'''（''' StartingPosition: 0 IgnoreCase: True OccurrencePosition=> Position
+    IF Position >= 0 THEN
+        Text.CropText.CropTextBeforeFlag Text: 対象ファイル ToFlag: $'''（''' IgnoreCase: True CroppedText=> 対象ファイル
+    END
+    Text.Replace Text: 対象ファイル TextToFind: $'''\\W+$''' IsRegEx: True IgnoreCase: True ReplaceWith: $'''%''%''' ActivateEscapeSequences: False Result=> 対象ファイル
+    Text.Trim Text: 対象ファイル TrimOption: Text.TrimOption.Both TrimmedText=> 対象ファイル
+END FUNCTION

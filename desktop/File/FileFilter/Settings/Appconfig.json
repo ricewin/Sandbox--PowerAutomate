@@ -1,0 +1,9 @@
+{
+    "AppSettings": {
+        "StrategyFile": "\\filter.json",
+        "StoreLog": "\\fslog.txt",
+        "WatchDirectory": "\\\\N_P2R\\EncodeBack",
+        "MoveDestDir": "\\\\N_P2R\\EncodeBack",
+        "FileNameFilter": "*.ts"
+    }
+}
