@@ -8,9 +8,11 @@
 
 ### 設定ファイル
 
+```text
 BaseDir
 ├ AppConfig.json
 └ filter.json
+```
 
 #### AppConfig.json
 

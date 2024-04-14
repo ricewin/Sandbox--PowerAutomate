@@ -8,9 +8,11 @@
 
 ### 設定ファイル
 
+```text
 BaseDir
 ├ AppConfig.json
 └ filter.json
+```
 
 #### AppConfig.json
 
@@ -40,10 +42,12 @@ BaseDir
 
 #### カスタムフィルター
 
+```text
 MoveDestDir
 ├ [dir1]
 ├ [dir2]
 └ [dir3]
+```
 
 - filter.json で定義して、任意のキーワードフィルターを構築できる
 - 上から順に比較する。ヒットすると以降の照合はしない
