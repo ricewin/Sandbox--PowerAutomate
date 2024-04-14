@@ -1,0 +1,23 @@
+
+FUNCTION Main_copy GLOBAL
+    **REGION 読み込み
+    CALL Now
+    SET Log TO $'''%CurrentDateTime% INFO Store process.'''
+    # Configファイルのパスを環境に合わせて書き換える
+    System.GetEnvironmentVariable.GetEnvironmentVariable Name: $'''OneDrive''' Value=> OneDrive
+    SET AppConfig TO $'''%OneDrive%\\OneLibrary\\automation\\ReaderStore-list\\AppConfig.json'''
+    File.GetPathPart File: AppConfig Directory=> BaseDir
+ON ERROR InvalidFilePathError
+    SET ErrorMsg TO $'''Configのパスが間違っています'''
+    CALL Catch
+    THROW ERROR
+END
+    CALL Init
+    **ENDREGION
+    CALL Scraping
+    **REGION 最終処理
+    CALL Now
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Process is succeed.''' Result=> Log
+    File.WriteText File: StoreLog TextToWrite: Log AppendNewLine: True IfFileExists: File.IfFileExists.Append Encoding: File.FileEncoding.Unicode
+    **ENDREGION
+END FUNCTION

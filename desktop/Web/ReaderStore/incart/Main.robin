@@ -1,0 +1,107 @@
+
+FUNCTION Main_copy GLOBAL
+    **REGION 設定
+    DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateAndTime CurrentDateTime=> CurrentDateTime
+    Text.ConvertDateTimeToText.FromCustomDateTime DateTime: CurrentDateTime CustomFormat: $'''yyyyMMddTHHmmss''' Result=> FormattedDateTime
+    Folder.GetSpecialFolder SpecialFolder: Folder.SpecialFolder.Personal SpecialFolderPath=> Documents
+    SET ExcelFile TO $'''%Documents%\\ReaderStore-purchase-%FormattedDateTime%.xlsx'''
+    **ENDREGION
+    **REGION スクレイピング
+    WebAutomation.LaunchEdge.AttachToEdgeByTitle TabTitle: $'''カート | ソニーの電子書籍ストア -Reader Store''' AttachTimeout: 5 BrowserInstance=> Browser
+    WebAutomation.ExtractData.ExtractTable BrowserInstance: Browser Control: $'''html > body > main > div > div:eq(22) > div:eq(0) > section:eq(0) > ul > li''' ExtractionParameters: {[$'''div:eq(0) > div > div:eq(0) > p > a''', $'''Own Text''', $'''''', $'''タイトル'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(0)''', $'''Own Text''', $'''''', $'''著者'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(1) > p:eq(1)''', $'''Own Text''', $'''''', $'''価格'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(1) > s > div''', $'''Own Text''', $'''''', $'''定価'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(2) > p:eq(1)''', $'''Own Text''', $'''''', $'''割引価格'''] } PostProcessData: False TimeoutInSeconds: 60 ExtractedData=> DataFromWebPage
+    **ENDREGION
+    Scripting.RunDotNetScript Imports: $'''System.Text.RegularExpressions''' Language: System.DotNetActionLanguageType.CSharp Script: $'''var table = new DataTable();
+table.Columns.Add(\"No.\");
+table.Columns.Add(\"タイトル\");
+table.Columns.Add(\"著者\");
+table.Columns.Add(\"定価\");
+table.Columns.Add(\"割引価格\");
+table.Columns.Add(\"割引率\");
+
+var no = 1;
+foreach (DataRow row in dt.Rows)
+{
+	var rate = 0.0;
+	var author = Regex.Replace(row[\"著者\"].ToString(), @\"\\s\", \"\");
+	if (row[\"定価\"] == \"\")
+	{
+		row[\"定価\"] = row[\"価格\"];
+	}
+	var price = Regex.Replace(row[\"定価\"].ToString(), @\"\\D\", \"\");
+	var discount = Regex.Replace(row[\"割引価格\"].ToString(), @\"\\D\", \"\");
+	if (discount == \"\")
+	{
+		discount = price;
+	}
+	else
+	{
+		rate = 1 - Double.Parse(discount) / Double.Parse(price);
+	}
+	table.Rows.Add(no, row[\"タイトル\"], author, price, discount, rate);
+	no++;
+}
+dt = table;''' @'name:dt': DataFromWebPage @'type:dt': $'''Datatable''' @'direction:dt': $'''InOut''' @dt=> DataFromWebPage
+    **REGION 出力
+    Excel.LaunchExcel.LaunchUnderExistingProcess Visible: False Instance=> ExcelInstance
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage.ColumnHeadersRow Column: $'''A''' Row: 1
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage Column: $'''A''' Row: 2
+    Excel.RenameWorksheet.RenameWorksheetWithIndex Instance: ExcelInstance Index: 1 NewName: $'''購入履歴'''
+    Excel.CloseExcel.CloseAndSaveAs Instance: ExcelInstance DocumentFormat: Excel.ExcelFormat.FromExtension DocumentPath: ExcelFile
+    WAIT (File.WaitForFile.Created File: ExcelFile)
+    **ENDREGION
+    @@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $'''Option Explicit
+Dim objExcel, objWorkbook, objSheet
+Set objExcel = CreateObject(\"Excel.Application\")
+objExcel.Application.Visible = False
+Set objWorkbook = objExcel.Workbooks.Open(\"%ExcelFile%\")
+Set objSheet = objWorkbook.Sheets(1)
+
+Const xlSrcRange = 1
+With objSheet
+    .Columns(\"D:E\").Style = \"Comma [0]\"
+    .Columns(\"F\").Style = \"Percent\"
+    .ListObjects.Add xlSrcRange, .Range(\"A1\").CurrentRegion
+End With
+
+Const xlTotalsCalculationSum = 1
+With objSheet.Range(\"A1\").ListObject
+    .TableStyle = \"\"
+    .ShowTotals = True
+    .ListColumns(\"定価\").TotalsCalculation = xlTotalsCalculationSum
+    .ListColumns(\"割引価格\").TotalsCalculation = xlTotalsCalculationSum
+End With
+
+Dim dataAll
+Set dataAll = objSheet.UsedRange
+dataAll.Borders.LineStyle = True
+
+Dim rows
+rows = dataAll.Rows.Count
+With objSheet
+    .Cells(rows + 2, \"C\").Value = \"商品小計（\" & rows - 2 & \"点）\"
+    .Cells(rows + 3, \"C\").Value = \"ポイント利用\"
+    .Cells(rows + 4, \"C\").Value = \"クーポン利用\"
+    .Cells(rows + 5, \"C\").Value = \"お支払金額\"
+    .Cells(rows + 6, \"C\").Value = \"合計獲得ポイント\"
+    .Cells(rows, \"F\").Value = \"=1-E\" & rows & \"/D\" & rows
+    .Cells(rows + 2, \"D\").Value = \"=E\" & rows
+    .Cells(rows + 5, \"D\").Value = \"=D\" & rows + 2 & \"-D\" & rows + 3 & \"-D\" & rows + 4
+    .Cells(rows + 5, \"F\").Value = \"=1-(E\" & rows & \"-D\" & rows + 4 & \"-D\" & rows + 6 & \")/D\" & rows
+    .Columns(\"A:F\").EntireColumn.Autofit
+End With
+
+Const xlCenter = -4108
+Const xlThemeColorAccent6 = 10
+Dim header
+Set header = dataAll.Resize(1)
+With header
+    .HorizontalAlignment = xlCenter
+    .Interior.ThemeColor = xlThemeColorAccent6
+    .Interior.TintAndShade = 0.8
+End With
+
+objWorkbook.Save
+objWorkbook.Close True
+objExcel.Quit'''
+END FUNCTION
