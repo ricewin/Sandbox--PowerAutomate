@@ -1,0 +1,21 @@
+
+FUNCTION Main_copy GLOBAL
+    Display.SelectFolder Description: $'''振り分け対象フォルダーを選択してください''' InitialDirectory: $'''\\\\N_P2R\\EncodeBack\\地上波''' IsTopMost: True SelectedFolder=> SelectedFolder ButtonPressed=> ButtonPressed
+    IF ButtonPressed = $'''OK''' THEN
+        Display.InputDialog Title: $'''振り分け対象''' Message: $'''サブフォルダーに移動するファイル名を入力してください。''' InputType: Display.InputType.SingleLine IsTopMost: True UserInput=> FileFilter ButtonPressed=> ButtonPressed2
+        LOOP WHILE (ButtonPressed2) = ($'''OK''')
+            IF (ButtonPressed2 = 'OK' AND FileFilter <> '') = True THEN
+                Folder.GetFiles Folder: SelectedFolder.FullName FileFilter: $'''*%FileFilter%*''' IncludeSubfolders: False FailOnAccessDenied: True SortBy1: Folder.SortBy.NoSort SortDescending1: False SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Files=> Files
+                SET 対象ファイル TO Files[0].Name
+                CALL Trim
+                IF (Folder.IfFolderExists.DoesNotExist Path: $'''%SelectedFolder.FullName%\\%対象ファイル%''') THEN
+                    Folder.Create FolderPath: SelectedFolder.FullName FolderName: 対象ファイル Folder=> 移動先フォルダー
+                ELSE
+                    SET 移動先フォルダー TO $'''%SelectedFolder.FullName%\\%対象ファイル%'''
+                END
+                File.Move Files: Files Destination: 移動先フォルダー IfFileExists: File.IfExists.DoNothing
+            END
+            Display.InputDialog Title: $'''振り分け対象''' Message: $'''サブフォルダーに移動するファイル名を入力してください。''' InputType: Display.InputType.SingleLine IsTopMost: True UserInput=> FileFilter ButtonPressed=> ButtonPressed2
+        END
+    END
+END FUNCTION

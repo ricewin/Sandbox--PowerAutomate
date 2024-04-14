@@ -1,0 +1,12 @@
+{
+    "filters": [
+        {
+            "storeDir": "\\BS",
+            "text": "BS"
+        },
+        {
+            "storeDir": "\\地上波",
+            "text": ""
+        }
+    ]
+}

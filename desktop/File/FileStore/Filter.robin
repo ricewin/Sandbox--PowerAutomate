@@ -1,0 +1,69 @@
+
+FUNCTION Filter GLOBAL
+    CALL Now
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Copy all process.''' Result=> Log
+    Folder.GetFiles Folder: WatchDirectory FileFilter: FileNameFilter IncludeSubfolders: False FailOnAccessDenied: True SortBy1: Folder.SortBy.NoSort SortDescending1: False SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Files=> Files
+    ON ERROR FolderNotFoundError
+        SET ErrorMsg TO $'''%WatchDirectory%が存在しません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR RetrieveFilesError
+        SET ErrorMsg TO $'''ファイルの一覧を取得できません。'''
+        CALL Catch
+        THROW ERROR
+    END
+    File.Copy Files: Files Destination: CopyAutoDestDir IfFileExists: File.IfExists.DoNothing
+    ON ERROR REPEAT 1 TIMES WAIT 20
+    ON ERROR InvalidDestinationFolderError
+        SET ErrorMsg TO $'''%CopyAutoDestDir%が存在しません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR CopyFileError
+        SET ErrorMsg TO $'''コピーできません。'''
+        CALL Catch
+        THROW ERROR
+    END
+    CALL Now
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Copy filter process.''' Result=> Log
+    LOOP FOREACH 対象ファイル IN Files
+        **REGION 比較
+        LOOP FOREACH 比較リスト IN filtering.filters
+            IF Contains(対象ファイル.Name, 比較リスト.text, True) THEN
+                SET isExclude TO True
+                EXIT LOOP
+            END
+        END
+        **ENDREGION
+        # 一致しなければコピー
+        IF isExclude = False THEN
+            CALL Now
+            Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO %対象ファイル.NameWithoutExtension%''' Result=> Log
+            File.Copy Files: 対象ファイル Destination: CopyFilterDestDir IfFileExists: File.IfExists.DoNothing
+            ON ERROR REPEAT 1 TIMES WAIT 20
+            ON ERROR InvalidDestinationFolderError
+                SET ErrorMsg TO $'''%CopyFilterDestDir%が存在しません。'''
+                CALL Catch
+                THROW ERROR
+            ON ERROR CopyFileError
+                SET ErrorMsg TO $'''%対象ファイル.Name%をコピーできません。'''
+                CALL Catch
+                THROW ERROR
+            END
+        ELSE
+            SET isExclude TO False
+        END
+    END
+    CALL Now
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Move process.''' Result=> Log
+    File.Move Files: Files Destination: MoveDestDir IfFileExists: File.IfExists.Overwrite
+    ON ERROR REPEAT 1 TIMES WAIT 20
+    ON ERROR InvalidDestinationFolderError
+        SET ErrorMsg TO $'''%MoveDestDir%が存在しません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR MoveFileError
+        SET ErrorMsg TO $'''移動できません。'''
+        CALL Catch
+        THROW ERROR
+    END
+END FUNCTION

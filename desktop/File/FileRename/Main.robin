@@ -1,0 +1,16 @@
+
+FUNCTION Main_copy GLOBAL
+    Display.SelectFolder Description: $'''リネーム対象フォルダーを選択してください''' InitialDirectory: $'''\\\\N_P2R\\EncodeBack\\地上波''' IsTopMost: True SelectedFolder=> SelectedFolder ButtonPressed=> ButtonPressed
+    IF ButtonPressed = $'''OK''' THEN
+        Display.InputDialog Title: $'''リネーム''' Message: $'''1行目に変更前のテキスト、2行目に変更後のテキストを入力してください。''' InputType: Display.InputType.Multiline IsTopMost: True UserInput=> Rename ButtonPressed=> ButtonPressed2
+        LOOP WHILE (ButtonPressed2) = ($'''OK''')
+            Text.SplitText.Split Text: Rename StandardDelimiter: Text.StandardDelimiter.NewLine DelimiterTimes: 1 Result=> TextList
+            IF (ButtonPressed2 = 'OK' AND Rename <> '') = True THEN
+                Folder.GetFiles Folder: SelectedFolder.FullName FileFilter: $'''*(*%TextList[0]%*)*''' IncludeSubfolders: True FailOnAccessDenied: True SortBy1: Folder.SortBy.NoSort SortDescending1: False SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Files=> Files
+                SET 対象ファイル TO Files[0].Name
+                File.RenameFiles.RenameReplaceText Files: Files TextToReplace: TextList[0] ReplaceWith: TextList[1] IfFileExists: File.IfExists.DoNothing RenamedFiles=> RenamedFiles
+            END
+            Display.InputDialog Title: $'''リネーム''' Message: $'''1行目に変更前のテキスト、2行目に変更後のテキストを入力してください。''' InputType: Display.InputType.Multiline IsTopMost: True UserInput=> Rename ButtonPressed=> ButtonPressed2
+        END
+    END
+END FUNCTION

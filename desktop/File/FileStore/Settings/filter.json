@@ -1,0 +1,14 @@
+{
+    "filters": [
+        {
+            "type": "Regex",
+            "hitAction": "Filtering",
+            "text": "test"
+        },
+        {
+            "type": "Regex",
+            "hitAction": "Filtering",
+            "text": "sample"
+        }
+    ]
+}
