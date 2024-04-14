@@ -1,0 +1,9 @@
+
+FUNCTION Main_copy GLOBAL
+    Folder.GetFiles Folder: $'''D:\\EncodeWork''' FileFilter: $'''*.avi''' IncludeSubfolders: False FailOnAccessDenied: True SortBy1: Folder.SortBy.LastModified SortDescending1: True SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Files=> Files
+    IF Files.Count = 0 THEN
+        EXIT Code: 0 ErrorMessage: $'''処理対象ファイルがありません'''
+    END
+    SET File TO Files[0]
+    CALL Choose
+END FUNCTION

@@ -1,0 +1,17 @@
+
+FUNCTION Choose GLOBAL
+    LOOP WHILE (ButtonPressed) <> ($'''Cancel''')
+        Display.SelectFromListDialog.SelectFromList Title: $'''除去''' Message: $'''処理を選択してください''' List: $'''赤カビ
+テロップ''' IsTopMost: True AllowEmpty: False SelectedItem=> SelectedItem ButtonPressed=> ButtonPressed
+        IF ButtonPressed = $'''Cancel''' THEN
+            EXIT LOOP
+        END
+        SWITCH SelectedItem
+            CASE = $'''赤カビ'''
+                SET ClipList TO [0, 810, 80, 1370]
+            CASE = $'''テロップ'''
+                SET ClipList TO [920, 80, 430, 430]
+        END
+        CALL Clip
+    END
+END FUNCTION

@@ -1,0 +1,5 @@
+
+FUNCTION Catch GLOBAL
+    ERROR => LastError
+    EXIT Code: 0 ErrorMessage: LastError
+END FUNCTION
