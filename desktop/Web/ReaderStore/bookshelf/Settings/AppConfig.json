@@ -1,0 +1,11 @@
+{
+    "AppSettings": {
+        "StrategyFile": "\\filter.json",
+        "StoreLog": "\\fslog.txt",
+        "SaveDir": "D:\\BookLists",
+        "Url": "https://ebookstore.sony.jp/mybook/list",
+        "isShow": true,
+        "isView": false,
+        "sortOrder": "SALE"
+    }
+}
