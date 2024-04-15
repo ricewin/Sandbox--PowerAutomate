@@ -1,0 +1,17 @@
+
+FUNCTION Main_copy GLOBAL
+    **REGION 読み込み
+    # Configファイルのパスを環境に合わせて書き換える
+    System.GetEnvironmentVariable.GetEnvironmentVariable Name: $'''OneDrive''' Value=> OneDrive
+    SET AppConfig TO $'''%OneDrive%\\OneLibrary\\automation\\SearchJob\\AppConfig.json'''
+    CALL Init
+    **ENDREGION
+    CALL Scraping
+    **REGION 保存
+    Folder.GetSpecialFolder SpecialFolder: Folder.SpecialFolder.Personal SpecialFolderPath=> SpecialFolderPath
+    File.WriteToCSVFile.WriteCSV VariableToWrite: DataFromWebPage CSVFile: $'''%SpecialFolderPath%\\%SaveName%''' CsvFileEncoding: File.CSVEncoding.Unicode IncludeColumnNames: False IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.SystemDefault
+    **ENDREGION
+    **REGION 最終処理
+    # おしまい！
+    **ENDREGION
+END FUNCTION

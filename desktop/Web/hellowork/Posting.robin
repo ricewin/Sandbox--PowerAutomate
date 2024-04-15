@@ -1,0 +1,18 @@
+
+FUNCTION Posting GLOBAL
+    **REGION 転記
+    Folder.GetSpecialFolder SpecialFolder: Folder.SpecialFolder.Personal SpecialFolderPath=> SpecialFolderPath
+    BLOCK Exception
+ON BLOCK ERROR
+CALL Catch
+THROW ERROR
+END
+        Excel.LaunchExcel.LaunchAndOpenUnderExistingProcess Path: $'''%SpecialFolderPath%\\新着求人.xlsx''' Visible: False ReadOnly: False Instance=> ExcelInstance
+        Excel.SetActiveWorksheet.ActivateWorksheetByIndex Instance: ExcelInstance Index: $'''求人情報'''
+        Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage Column: $'''A''' Row: 2
+        Excel.ResizeColumnsOrRows.AutofitAllColumns Instance: ExcelInstance
+        Excel.SetActiveWorksheet.ActivateWorksheetByName Instance: ExcelInstance Name: $'''集計'''
+        Excel.CloseExcel.CloseAndSave Instance: ExcelInstance
+    END
+    **ENDREGION
+END FUNCTION

@@ -1,0 +1,59 @@
+
+FUNCTION Main_copy GLOBAL
+    **REGION 設定
+    Folder.GetSpecialFolder SpecialFolder: Folder.SpecialFolder.Personal SpecialFolderPath=> Documents
+    SET ExcelFile TO $'''%Documents%\\MicrosoftRewards.xlsx'''
+    **ENDREGION
+    **REGION スクレイピング
+    WebAutomation.LaunchEdge.LaunchEdge Url: $'''https://rewards.bing.com/redeem/orderhistory''' WindowState: WebAutomation.BrowserWindowState.Normal ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
+    WebAutomation.ExtractData.ExtractHtmlTable BrowserInstance: Browser Control: $'''html > body > div:eq(0) > div:eq(1) > main > div:eq(1) > div:eq(1) > div:eq(1) > table''' ExtractionParameters: {[$'''状態''', $'''日付''', $'''リワード''', $'''ポイント''', $'''ポイント #1''', $'''ポイント #2'''], [$'''''', $'''''', $'''''', $'''''', $'''''', $''''''] } PostProcessData: False TimeoutInSeconds: 60 ExtractedData=> DataFromWebPage
+    WebAutomation.CloseWebBrowser BrowserInstance: Browser
+    **ENDREGION
+    Scripting.RunDotNetScript Language: System.DotNetActionLanguageType.CSharp Script: $'''dt.Columns.Remove(\"ポイント #1\");
+dt.Columns.Remove(\"ポイント #2\");
+
+var table = dt.Clone();
+foreach (DataRow row in dt.Rows)
+{
+	var s = row[\"リワード\"].ToString();
+	var position = s.IndexOf(\"注文番号\");
+	var rewards = s.Substring(0, position).Trim();	
+	table.Rows.Add(row[\"状態\"], row[\"日付\"], rewards, row[\"ポイント\"]);
+}
+dt = table;''' @'name:dt': DataFromWebPage @'type:dt': $'''Datatable''' @'direction:dt': $'''InOut''' @dt=> DataFromWebPage
+    **REGION 出力
+    Excel.LaunchExcel.LaunchUnderExistingProcess Visible: True Instance=> ExcelInstance
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage.ColumnHeadersRow Column: $'''A''' Row: 1
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage Column: $'''A''' Row: 2
+    Excel.ResizeColumnsOrRows.AutofitAllColumns Instance: ExcelInstance
+    Excel.RenameWorksheet.RenameWorksheetWithIndex Instance: ExcelInstance Index: 1 NewName: $'''注文履歴'''
+    Excel.CloseExcel.CloseAndSaveAs Instance: ExcelInstance DocumentFormat: Excel.ExcelFormat.FromExtension DocumentPath: ExcelFile
+    WAIT (File.WaitForFile.Created File: ExcelFile)
+    **ENDREGION
+    @@copilotGeneratedAction: 'False'
+Scripting.RunVBScript.RunVBScript VBScriptCode: $'''Option Explicit
+
+Dim objExcel, objWorkbook, objSheet
+Set objExcel = CreateObject(\"Excel.Application\")
+Set objWorkbook = objExcel.Workbooks.Open(\"%ExcelFile%\")
+Set objSheet = objWorkbook.Sheets(1)
+objExcel.Application.Visible = False
+
+Dim dataAll
+Set dataAll = objSheet.UsedRange
+dataAll.Borders.LineStyle = True
+
+Const xlCenter = -4108
+Const xlThemeColorAccent6 = 10
+Dim header
+Set header = dataAll.Resize(1)
+With header
+    .HorizontalAlignment = xlCenter
+    .Interior.ThemeColor = xlThemeColorAccent6
+    .Interior.TintAndShade = 0.8
+End With
+
+objWorkbook.Save
+objWorkbook.Close True
+objExcel.Quit'''
+END FUNCTION

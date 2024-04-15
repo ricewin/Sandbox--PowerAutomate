@@ -1,0 +1,30 @@
+
+FUNCTION Init GLOBAL
+    **REGION 設定ファイル
+    File.ReadTextFromFile.ReadTextAsList File: AppConfig Encoding: File.TextFileEncoding.UTF8 Contents=> FileContents
+    ON ERROR DirectoryNotFoundError
+        SET ErrorMsg TO $'''ディレクトリが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR FileNotFoundError
+        SET ErrorMsg TO $'''ファイルが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR ReadFromFileError
+        SET ErrorMsg TO $'''ファイルを読み取れませんでした。'''
+        CALL Catch
+        THROW ERROR
+    END
+    Variables.ConvertJsonToCustomObject Json: FileContents CustomObject=> Settings
+    ON ERROR ParseJsonError
+        SET ErrorMsg TO $'''構文エラーです。'''
+        CALL Catch
+        THROW ERROR
+    END
+    SET SaveName TO Settings['AppSettings']['SaveName']
+    SET Prefecture TO Settings['AppSettings']['Prefecture']
+    SET NewJob TO Settings['AppSettings']['NewJob']
+    SET Cities TO Settings['AppSettings']['Cities']
+    SET Extract TO Settings['AppSettings']['Extract']
+    **ENDREGION
+END FUNCTION
