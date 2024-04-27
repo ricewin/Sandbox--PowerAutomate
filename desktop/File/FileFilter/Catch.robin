@@ -1,6 +1,8 @@
 
 FUNCTION Catch GLOBAL
+    ERROR => LastError
     CALL Now
     Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% ERROR Process is failure. %ErrorMsg%''' Result=> Log
     File.WriteText File: StoreLog TextToWrite: Log AppendNewLine: True IfFileExists: File.IfFileExists.Append Encoding: File.FileEncoding.Unicode
+    EXIT Code: 0 ErrorMessage: LastError
 END FUNCTION

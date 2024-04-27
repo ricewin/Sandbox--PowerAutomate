@@ -1,0 +1,29 @@
+{
+    "AppSettings": {
+        "SaveName": "新着求人.csv",
+        "Age": 0,
+        "Prefecture": "東京都",
+        "Cities": [
+            {
+                "City": "千代田区"
+            },
+            {
+                "City": "中央区"
+            },
+            {
+                "City": "港区"
+            },
+            {
+                "City": "新宿区"
+            },
+            {
+                "City": "文京区"
+            }
+        ],
+        "Type": false,
+        "Employment": "任意",
+        "NewJob": 1,
+        "FreeWard": "",
+        "Extract": 16
+    }
+}

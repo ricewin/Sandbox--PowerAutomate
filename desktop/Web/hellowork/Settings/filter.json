@@ -1,0 +1,302 @@
+{
+    "Job": [
+        {
+            "header": "事務、管理職"
+        },
+        {
+            "header": "営業"
+        },
+        {
+            "header": "販売"
+        },
+        {
+            "header": "接客、理美容、調理、サービス"
+        },
+        {
+            "header": "介護、福祉"
+        },
+        {
+            "header": "保育、教育"
+        },
+        {
+            "header": "医療、看護、保健"
+        },
+        {
+            "header": "製造、修理、保全、検査、印刷"
+        },
+        {
+            "header": "技術職（建設、開発、ＩＴ）、専門職"
+        },
+        {
+            "header": "建築、土木、電気工事"
+        },
+        {
+            "header": "警備、施設管理、設備運転"
+        },
+        {
+            "header": "運輸（運転）、配送"
+        },
+        {
+            "header": "清掃・洗浄、倉庫、包装、軽作業"
+        },
+        {
+            "header": "農業、林業、漁業"
+        }
+    ],
+    "Selection": [
+        {
+            "skHid01":[
+                {
+                    "id": "ID_skCheck010",
+                    "text": "こだわらない"
+                },
+                {
+                    "id": "ID_skCheck011",
+                    "text": "一般事務、事務補助"
+                },
+                {
+                    "id": "ID_skCheck0110",
+                    "text": "総務事務、人事事務"
+                },
+                {
+                    "id": "ID_skCheck0111",
+                    "text": "受付・案内事務、秘書"
+                },
+                {
+                    "id": "ID_skCheck0112",
+                    "text": "医療事務・受付、調剤薬局事務、介護事務"
+                },
+                {
+                    "id": "ID_skCheck0113",
+                    "text": "会計・経理事務"
+                },
+                {
+                    "id": "ID_skCheck0114",
+                    "text": "営業事務、販売事務"
+                },
+                {
+                    "id": "ID_skCheck0115",
+                    "text": "金融・保険事務"
+                },
+                {
+                    "id": "ID_skCheck012",
+                    "text": "貿易事務"
+                },
+                {
+                    "id": "ID_skCheck013",
+                    "text": "企画事務、マーケティング"
+                },
+                {
+                    "id": "ID_skCheck014",
+                    "text": "生産・工程管理事務、出荷・受荷事務"
+                },
+                {
+                    "id": "ID_skCheck015",
+                    "text": "運行管理事務、郵便事務、旅客・料金収受係"
+                },
+                {
+                    "id": "ID_skCheck016",
+                    "text": "データ入力等ＰＣ操作（ＣＡＤ、ＤＴＰ含）"
+                },
+                {
+                    "id": "ID_skCheck017",
+                    "text": "コールセンターオペレーター、テレアポ等"
+                },
+                {
+                    "id": "ID_skCheck018",
+                    "text": "集金・検針・調査等の外勤事務"
+                },
+                {
+                    "id": "ID_skCheck019",
+                    "text": "法人・団体の役員・管理職等"
+                }
+    
+            ]
+        },
+        {
+            "skHid02": [
+                {
+                    "id": "ID_skCheck020",
+                    "text": "こだわらない"
+                },
+                {
+                    "id": "ID_skCheck021",
+                    "text": "不動産営業"
+                },
+                {
+                    "id": "ID_LskCheck0210",
+                    "text": "金融・保険営業"
+                },
+                {
+                    "id": "ID_LskCheck0211",
+                    "text": "飲食料品販売営業"
+                },
+                {
+                    "id": "ID_LskCheck0212",
+                    "text": "機械器具・電気器具販売営業"
+                },
+                {
+                    "id": "ID_LskCheck0213",
+                    "text": "自動車販売営業"
+                },
+                {
+                    "id": "ID_LskCheck0224",
+                    "text": "製品受注営業"
+                },
+                {
+                    "id": "ID_LskCheck0215",
+                    "text": "通信・情報システム営業"
+                },
+                {
+                    "id": "ID_LskCheck022",
+                    "text": "化学品販売営業、医薬品営業"
+                },
+                {
+                    "id": "ID_LskCheck023",
+                    "text": "広告営業、会員勧誘、その他の営業"
+                },
+                {
+                    "id": "ID_LskCheck024",
+                    "text": "テレフォンアポインター"
+                }
+            ],
+            "skHid03": [
+                {
+                    "id": "ID_skCheck030",
+                    "text": "こだわらない"
+                },
+                {
+                    "id": "ID_skCheck031",
+                    "text": "スーパー・百貨店販売店員"
+                },
+                {
+                    "id": "ID_skCheck0310",
+                    "text": "その他の小売店販売員"
+                },
+                {
+                    "id": "ID_skCheck0311",
+                    "text": "小売店作業員（商品の陳列・補充等）"
+                },
+                {
+                    "id": "ID_skCheck0312",
+                    "text": "店長（小売、卸売）"
+                },
+                {
+                    "id": "ID_skCheck0313",
+                    "text": "不動産仲介・売買"
+                },
+                {
+                    "id": "ID_skCheck0314",
+                    "text": "訪問販売、卸売、その他の販売"
+                },
+                {
+                    "id": "ID_skCheck032",
+                    "text": "レジ係"
+                },
+                {
+                    "id": "ID_skCheck033",
+                    "text": "コンビニエンスストア店員"
+                },
+                {
+                    "id": "ID_skCheck034",
+                    "text": "衣料品販売店員"
+                },
+                {
+                    "id": "ID_skCheck035",
+                    "text": "飲食料品販売店員"
+                },
+                {
+                    "id": "ID_skCheck036",
+                    "text": "医薬品・化粧品販売店員"
+                },
+                {
+                    "id": "ID_skCheck037",
+                    "text": "自動車販売店員"
+                },
+                {
+                    "id": "ID_skCheck038",
+                    "text": "電気機器販売店員"
+                },
+                {
+                    "id": "ID_skCheck039",
+                    "text": "ガソリンスタンド販売員"
+                }
+            ],
+            "skHid04": [
+                {
+                    "id": "ID_LskCheck040",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid05": [
+                {
+                    "id": "ID_LskCheck050",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid06": [
+                {
+                    "id": "ID_LskCheck060",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid07": [
+                {
+                    "id": "ID_LskCheck070",
+                    "text": "こだわらない"
+                },
+                {
+                    "id": "ID_LskCheck071",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid08": [
+                {
+                    "id": "ID_LskCheck080",
+                    "text": "こだわらない"
+                },
+                {
+                    "id": "ID_LskCheck081",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid09": [
+                {
+                    "id": "ID_LskCheck090",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid10": [
+                {
+                    "id": "ID_LskCheck100",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid11": [
+                {
+                    "id": "ID_LskCheck110",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid12": [
+                {
+                    "id": "ID_LskCheck120",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid13": [
+                {
+                    "id": "ID_LskCheck130",
+                    "text": "こだわらない"
+                }
+            ],
+            "skHid14": [
+                {
+                    "id": "ID_LskCheck140",
+                    "text": "こだわらない"
+                }
+            ]
+
+        }
+    ]
+}
