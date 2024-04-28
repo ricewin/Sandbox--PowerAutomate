@@ -2,87 +2,92 @@
 FUNCTION Scraping GLOBAL
     CALL Now
     Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Scraping is start.''' Result=> Log
-    WebAutomation.LaunchEdge.LaunchEdge Url: URL WindowState: WebAutomation.BrowserWindowState.Normal ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
-    ON ERROR LaunchEdgeError
-        SET ErrorMsg TO $'''Edgeを起動できませんでした'''
-        CALL Catch
-        THROW ERROR
-    END
-    SET BookShelfs TO filtering['bookShelf']
-    LOOP FOREACH BookShelf IN BookShelfs
-        # issu: 大分類：書籍、コミック、雑誌
-        SET issue TO BookShelf['issue']
-        SWITCH issue
-            CASE = 1
-                SET Category TO $'''コミック'''
-            CASE = 2
-                SET Category TO $'''書籍'''
-            CASE = 3
-                SET Category TO $'''雑誌'''
+    BLOCK Exception
+ON BLOCK ERROR
+CALL Catch
+THROW ERROR
+END
+        WebAutomation.LaunchEdge.LaunchEdge Url: URL WindowState: WebAutomation.BrowserWindowState.Normal ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
+        ON ERROR LaunchEdgeError
+            SET ErrorMsg TO $'''Edgeを起動できませんでした'''
+            CALL Catch
+            THROW ERROR
         END
-        CALL Now
-        Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Scraping - %issue%.''' Result=> Log
-        LOOP FOREACH genre IN BookShelf['genre']
-            IF issue = 2 THEN
-                NEXT LOOP
+        SET BookShelfs TO filtering['bookShelf']
+        LOOP FOREACH BookShelf IN BookShelfs
+            # issu: 大分類：書籍、コミック、雑誌
+            SET issue TO BookShelf['issue']
+            SWITCH issue
+                CASE = 1
+                    SET Category TO $'''コミック'''
+                CASE = 2
+                    SET Category TO $'''書籍'''
+                CASE = 3
+                    SET Category TO $'''雑誌'''
             END
-            # genre: 小分類
-            CALL Subcatergory
-            **REGION 最初のページに移動
-            SET URL2 TO $'''%URL%?displayStatus=%isShow%&issueTypeCd=%issue%&genreId=%genre%&listButtonFlg=%isView%&sortOrder=%sortOrder%'''
-            WebAutomation.GoToWebPage.GoToWebPage BrowserInstance: Browser Url: URL2 WaitForPageToLoadTimeout: 60
-            ON ERROR NavigateToWebPageError
-                SET ErrorMsg TO $'''ページに移動できませんでした'''
-                CALL Catch
-                THROW ERROR
-            ON ERROR InvalidUrlError
-                SET ErrorMsg TO $'''URLが間違っています'''
-                CALL Catch
-                THROW ERROR
-            END
-            **ENDREGION
-            IF (WebAutomation.IfWebPageContains.WebPageDoesNotContainElement BrowserInstance: Browser Control: appmask['Reader Store mybook']['Unordered lists']) THEN
-                NEXT LOOP
-            END
-            DISABLE Text.Replace Text: Pager TextToFind: $'''\\D+''' IsRegEx: True IgnoreCase: False ReplaceWith: $''',''' ActivateEscapeSequences: False Result=> Pager
-            @@copilotGeneratedAction: 'False'
-DISABLE Scripting.RunPythonScript PythonCode: $'''list = [%Pager%]
-item = list[-1]
-print item,''' ScriptOutput=> PythonScriptOutput ScriptError=> ScriptError
-            DISABLE Text.ToNumber Text: PythonScriptOutput[1:] Number=> PageLast
-            DISABLE Text.JoinText.JoinWithCustomDelimiter List: PagerLists CustomDelimiter: $''',''' Result=> JoinedText
-            DISABLE Variables.ReverseList List: PagerLists
-            **REGION ページ数を取得
-            WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['Reader Store mybook']['Unordered lists'] AttributeName: $'''Own Text''' AttributeValue=> Pager
-            Text.SplitText.Split Text: Pager StandardDelimiter: Text.StandardDelimiter.NewLine DelimiterTimes: 1 Result=> PagerLists
-            Text.ToNumber Text: PagerLists[PagerLists.Count - 1] Number=> PageLast
-            **ENDREGION
-            NEXT LOOP
-            Variables.CreateNewDatatable InputTable: { ^[] } DataTable=> DataTable
             CALL Now
-            Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Scraping - %issue% - %genre%.''' Result=> Log
-            LOOP Page FROM 1 TO PageLast STEP 1
-                IF Page <> 1 THEN
-                    SET URL3 TO $'''%URL2%&page=%Page%'''
-                    WebAutomation.GoToWebPage.GoToWebPage BrowserInstance: Browser Url: URL3 WaitForPageToLoadTimeout: 60
-                    ON ERROR NavigateToWebPageError
-                        SET ErrorMsg TO $'''ページに移動できませんでした'''
-                        CALL Catch
-                        THROW ERROR
-                    ON ERROR InvalidUrlError
-                        SET ErrorMsg TO $'''URLが間違っています'''
-                        CALL Catch
-                        THROW ERROR
-                    END
+            Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Scraping - %issue%.''' Result=> Log
+            LOOP FOREACH genre IN BookShelf['genre']
+                IF issue = 2 THEN
+                    NEXT LOOP
                 END
-                WebAutomation.ExtractData.ExtractTableUsingPagingFromNumberOfPages BrowserInstance: Browser Control: $'''html > body > main > div:eq(0) > div > div:eq(4) > ul > li''' ExtractionParameters: {[$'''div > div:eq(1) > p:eq(0) > a''', $'''Own Text''', $'''''', $'''Value #1'''], [$'''div > div:eq(1) > p:eq(1) > a''', $'''Own Text''', $'''''', $'''Value #2'''] } MaxWebPagesToProcess: 1 UsePhysicalClick: False PagerCssSelector: $'''html > body > main > div:eq(0) > div > div:eq(5) > div > ul > li:eq(1) > a''' PostProcessData: False TimeoutInSeconds: 60 ExtractedData=> DataFromWebPage
-                ON ERROR
-                    SET ErrorMsg TO $'''抽出できませんでした'''
+                # genre: 小分類
+                CALL Subcatergory
+                **REGION 最初のページに移動
+                SET URL2 TO $'''%URL%?displayStatus=%isShow%&issueTypeCd=%issue%&genreId=%genre%&listButtonFlg=%isView%&sortOrder=%sortOrder%'''
+                WebAutomation.GoToWebPage.GoToWebPage BrowserInstance: Browser Url: URL2 WaitForPageToLoadTimeout: 60
+                ON ERROR NavigateToWebPageError
+                    SET ErrorMsg TO $'''ページに移動できませんでした'''
+                    CALL Catch
+                    THROW ERROR
+                ON ERROR InvalidUrlError
+                    SET ErrorMsg TO $'''URLが間違っています'''
                     CALL Catch
                     THROW ERROR
                 END
-                # カテゴリー列を追加
-                Scripting.RunDotNetScript Language: System.DotNetActionLanguageType.CSharp Script: $'''dt1.Columns[0].ColumnName = \"タイトル\";
+                **ENDREGION
+                IF (WebAutomation.IfWebPageContains.WebPageDoesNotContainElement BrowserInstance: Browser Control: appmask['Reader Store mybook']['Unordered lists']) THEN
+                    NEXT LOOP
+                END
+                DISABLE Text.Replace Text: Pager TextToFind: $'''\\D+''' IsRegEx: True IgnoreCase: False ReplaceWith: $''',''' ActivateEscapeSequences: False Result=> Pager
+                @@copilotGeneratedAction: 'False'
+DISABLE Scripting.RunPythonScript PythonCode: $'''list = [%Pager%]
+item = list[-1]
+print item,''' ScriptOutput=> PythonScriptOutput ScriptError=> ScriptError
+                DISABLE Text.ToNumber Text: PythonScriptOutput[1:] Number=> PageLast
+                DISABLE Text.JoinText.JoinWithCustomDelimiter List: PagerLists CustomDelimiter: $''',''' Result=> JoinedText
+                DISABLE Variables.ReverseList List: PagerLists
+                **REGION ページ数を取得
+                WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['Reader Store mybook']['Unordered lists'] AttributeName: $'''Own Text''' AttributeValue=> Pager
+                Text.SplitText.Split Text: Pager StandardDelimiter: Text.StandardDelimiter.NewLine DelimiterTimes: 1 Result=> PagerLists
+                Text.ToNumber Text: PagerLists[PagerLists.Count - 1] Number=> PageLast
+                **ENDREGION
+                NEXT LOOP
+                Variables.CreateNewDatatable InputTable: { ^[] } DataTable=> DataTable
+                CALL Now
+                Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Scraping - %issue% - %genre%.''' Result=> Log
+                LOOP Page FROM 1 TO PageLast STEP 1
+                    IF Page <> 1 THEN
+                        SET URL3 TO $'''%URL2%&page=%Page%'''
+                        WebAutomation.GoToWebPage.GoToWebPage BrowserInstance: Browser Url: URL3 WaitForPageToLoadTimeout: 60
+                        ON ERROR NavigateToWebPageError
+                            SET ErrorMsg TO $'''ページに移動できませんでした'''
+                            CALL Catch
+                            THROW ERROR
+                        ON ERROR InvalidUrlError
+                            SET ErrorMsg TO $'''URLが間違っています'''
+                            CALL Catch
+                            THROW ERROR
+                        END
+                    END
+                    WebAutomation.ExtractData.ExtractTableUsingPagingFromNumberOfPages BrowserInstance: Browser Control: $'''html > body > main > div:eq(0) > div > div:eq(4) > ul > li''' ExtractionParameters: {[$'''div > div:eq(1) > p:eq(0) > a''', $'''Own Text''', $'''''', $'''Value #1'''], [$'''div > div:eq(1) > p:eq(1) > a''', $'''Own Text''', $'''''', $'''Value #2'''] } MaxWebPagesToProcess: 1 UsePhysicalClick: False PagerCssSelector: $'''html > body > main > div:eq(0) > div > div:eq(5) > div > ul > li:eq(1) > a''' PostProcessData: False TimeoutInSeconds: 60 ExtractedData=> DataFromWebPage
+                    ON ERROR
+                        SET ErrorMsg TO $'''抽出できませんでした'''
+                        CALL Catch
+                        THROW ERROR
+                    END
+                    # カテゴリー列を追加
+                    Scripting.RunDotNetScript Language: System.DotNetActionLanguageType.CSharp Script: $'''dt1.Columns[0].ColumnName = \"タイトル\";
 dt1.Columns[1].ColumnName = \"著者\";
 
 var dc1 = new DataColumn();
@@ -96,18 +101,19 @@ dc2.ColumnName = \"Subcatergory\";
 dc2.DataType = typeof(string);
 dc2.DefaultValue = value2;
 dt1.Columns.Add(dc2);''' @'name:dt1': DataFromWebPage @'type:dt1': $'''Datatable''' @'direction:dt1': $'''InOut''' @'name:value1': Category @'type:value1': $'''String''' @'direction:value1': $'''In''' @'name:value2': Subcatergory @'type:value2': $'''String''' @'direction:value2': $'''In''' @dt1=> DataFromWebPage
-            END
-            # 結合
-            Scripting.RunDotNetScript Language: System.DotNetActionLanguageType.CSharp Script: $'''dt1.Merge(dt2);''' @'name:dt1': DataTable @'type:dt1': $'''Datatable''' @'direction:dt1': $'''InOut''' @'name:dt2': DataFromWebPage @'type:dt2': $'''Datatable''' @'direction:dt2': $'''In''' @dt1=> DataTable
-            File.WriteToCSVFile.WriteCSV VariableToWrite: DataTable CSVFile: $'''%SaveDir%\\BookList-%Category%-%Subcatergory%.csv''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: False IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.SystemDefault
-            ON ERROR WriteToCSVError
-                SET ErrorMsg TO $'''書き込めませんでした'''
-                CALL Catch
-                THROW ERROR
+                END
+                # 結合
+                Scripting.RunDotNetScript Language: System.DotNetActionLanguageType.CSharp Script: $'''dt1.Merge(dt2);''' @'name:dt1': DataTable @'type:dt1': $'''Datatable''' @'direction:dt1': $'''InOut''' @'name:dt2': DataFromWebPage @'type:dt2': $'''Datatable''' @'direction:dt2': $'''In''' @dt1=> DataTable
+                File.WriteToCSVFile.WriteCSV VariableToWrite: DataTable CSVFile: $'''%SaveDir%\\BookList-%Category%-%Subcatergory%.csv''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: False IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.SystemDefault
+                ON ERROR WriteToCSVError
+                    SET ErrorMsg TO $'''書き込めませんでした'''
+                    CALL Catch
+                    THROW ERROR
+                END
             END
         END
+        WebAutomation.CloseWebBrowser BrowserInstance: Browser
     END
-    WebAutomation.CloseWebBrowser BrowserInstance: Browser
     CALL Now
     Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Scraping is complete.''' Result=> Log
 END FUNCTION

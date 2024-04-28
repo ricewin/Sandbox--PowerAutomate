@@ -1,0 +1,11 @@
+
+FUNCTION Catch GLOBAL
+    ERROR => LastError
+    IF (UIAutomation.IfWindow.IsOpenByInstanceOrHandle WindowInstance: Browser) THEN
+        WebAutomation.CloseWebBrowser BrowserInstance: Browser
+    END
+    IF (UIAutomation.IfWindow.IsOpenByInstanceOrHandle WindowInstance: ExcelInstance) THEN
+        Excel.CloseExcel.Close Instance: ExcelInstance
+    END
+    EXIT Code: 0 ErrorMessage: LastError
+END FUNCTION
