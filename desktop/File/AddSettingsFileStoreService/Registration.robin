@@ -1,0 +1,57 @@
+
+FUNCTION Registration GLOBAL
+    XML.ReadFromFile File: $'''%OneDrive%%MasterFile%''' Encoding: XML.FileEncoding.DefaultEncoding XmlDocument=> XmlDocument
+    ON ERROR DirectoryNotFoundError
+        SET ErrorMsg TO $'''ディレクトリが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR FileNotFoundError
+        SET ErrorMsg TO $'''ファイルが見つかりません。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR ReadFileError
+        SET ErrorMsg TO $'''ファイルを読み取れませんでした。'''
+        CALL Catch
+        THROW ERROR
+    ON ERROR InvalidFileError
+        SET ErrorMsg TO $'''ファイルに有効な XML ドキュメントが含まれていません。'''
+        CALL Catch
+        THROW ERROR
+    END
+    Cryptography.HashText HashAlgorithm: Cryptography.HashAlgorithm.SHA256 Encoding: Cryptography.EncryptionEncoding.Unicode TextToHash: XmlDocument HashedText=> HashedTextA
+    LOOP FOREACH タイトル IN 作品リスト
+        CALL Now
+        XML.ExecuteXPathQuery.ExecuteXPathAndGetFirstValueOnly XmlDocument: XmlDocument XPathQuery: $'''//Strategy[contains(Regex, \"%タイトル%\")]''' XPathResult=> XPathResult
+        IF StartsWith(XPathResult, $'''<''', False) THEN
+            Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Skip %タイトル%''' Result=> Log
+            NEXT LOOP
+        END
+        **REGION フォルダーの作成
+        IF (Folder.IfFolderExists.DoesNotExist Path: $'''%Server%%StoreDir%\\%タイトル%''') THEN
+            Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO mkdir %タイトル%''' Result=> Log
+            Folder.Create FolderPath: $'''%Server%%StoreDir%''' FolderName: タイトル
+            ON ERROR REPEAT 3 TIMES WAIT 15
+            ON ERROR
+                SET ErrorMsg TO $'''フォルダー「%タイトル%」を作成できません。'''
+                CALL Catch
+                THROW ERROR
+            END
+        END
+        **ENDREGION
+        Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Set %タイトル%''' Result=> Log
+        **REGION 定義ファイルに追加
+        Scripting.RunDotNetScript Language: System.DotNetActionLanguageType.CSharp Script: $'''g = Guid.NewGuid();''' @'name:g': $'''''' @'type:g': $'''Dynamic''' @'direction:g': $'''Out''' @g=> GUID
+        XML.InsertElement Document: XmlDocument XPathQuery: $'''Strategies''' Element: $'''<Strategy name=\"%GUID%\">
+    <Regex>%タイトル%</Regex>
+    <DestDir>%DestDir%</DestDir>
+    <DestDir>%Fqdn%%StoreDir%\\%タイトル%</DestDir>
+  </Strategy>'''
+        **ENDREGION
+    END
+    Cryptography.HashText HashAlgorithm: Cryptography.HashAlgorithm.SHA256 Encoding: Cryptography.EncryptionEncoding.Unicode TextToHash: XmlDocument HashedText=> HashedTextB
+    IF HashedTextA <> HashedTextB THEN
+        XML.WriteXmlToFile.WriteToFileFormatted File: $'''%OneDrive%%MasterFile%''' Xml: XmlDocument Encoding: XML.FileEncoding.UTF8 Indentation: 2
+        ON ERROR REPEAT 3 TIMES WAIT 15
+        END
+    END
+END FUNCTION

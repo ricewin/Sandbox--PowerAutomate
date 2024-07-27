@@ -1,0 +1,13 @@
+
+FUNCTION Main_copy GLOBAL
+    System.GetEnvironmentVariable.GetEnvironmentVariable Name: $'''OneDrive''' Value=> OneDrive
+    Display.SelectFolder Description: $'''画像フォルダーを選択''' InitialDirectory: $'''%OneDrive%\\My favorite\\Aiイラスト''' IsTopMost: True SelectedFolder=> SelectedFolder ButtonPressed=> ButtonPressed
+    IF ButtonPressed = $'''Cancel''' THEN
+        EXIT Code: 0
+    END
+    Folder.GetFiles Folder: SelectedFolder FileFilter: $'''Designer*''' IncludeSubfolders: False FailOnAccessDenied: True SortBy1: Folder.SortBy.NoSort SortDescending1: False SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Files=> Files
+    LOOP FOREACH CurrentItem IN Files
+        Text.ConvertDateTimeToText.FromCustomDateTime DateTime: CurrentItem.CreationTime CustomFormat: $'''yyyyMMddTHms''' Result=> FormattedDateTime
+        File.RenameFiles.Rename Files: CurrentItem NewName: $'''Designer-%FormattedDateTime%-%CurrentItem.Size%''' KeepExtension: True IfFileExists: File.IfExists.DoNothing
+    END
+END FUNCTION

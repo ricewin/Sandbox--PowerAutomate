@@ -1,0 +1,23 @@
+
+FUNCTION Init GLOBAL
+    **REGION 設定ファイル
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% INFO Check config.''' Result=> Log
+    File.ReadTextFromFile.ReadTextAsList File: AppConfig Encoding: File.TextFileEncoding.UTF8 Contents=> FileContents
+    ON ERROR
+        SET ErrorMsg TO $'''%AppConfig% を読み取れません。'''
+        THROW ERROR
+    END
+    Variables.ConvertJsonToCustomObject Json: FileContents CustomObject=> Settings
+    ON ERROR ParseJsonError
+        SET ErrorMsg TO $'''構文エラーです。'''
+        CALL Catch
+        THROW ERROR
+    END
+    SET StoreLog TO $'''%BaseDir%%Settings['AppSettings']['StoreLog']%'''
+    SET Fqdn TO Settings['AppSettings']['Fqdn']
+    SET Server TO Settings['AppSettings']['Server']
+    SET StoreDir TO Settings['AppSettings']['StoreDir']
+    SET MasterFile TO Settings['AppSettings']['MasterFile']
+    SET DestDir TO Settings['AppSettings']['DestDir']
+    **ENDREGION
+END FUNCTION

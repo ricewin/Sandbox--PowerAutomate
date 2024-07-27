@@ -1,0 +1,10 @@
+{
+    "AppSettings": {
+        "StoreLog": "\\fslog.txt",
+        "Fqdn": "\\\\hogehoge",
+        "Server": "\\\\192.168.xxx.xxx",
+        "StoreDir": "\\Video",
+        "MasterFile": "\\xxx\\xxx\\MasterSetting.xml",
+        "DestDir": "D:\\Q"
+    }
+}
