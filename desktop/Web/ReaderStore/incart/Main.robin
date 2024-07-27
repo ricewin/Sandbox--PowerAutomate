@@ -8,7 +8,15 @@ FUNCTION Main_copy GLOBAL
     **ENDREGION
     **REGION スクレイピング
     WebAutomation.LaunchEdge.AttachToEdgeByTitle TabTitle: $'''カート | ソニーの電子書籍ストア -Reader Store''' AttachTimeout: 5 BrowserInstance=> Browser
+ON ERROR
+    CALL Catch
+    THROW ERROR
+END
     WebAutomation.ExtractData.ExtractTable BrowserInstance: Browser Control: $'''html > body > main > div > div:eq(22) > div:eq(0) > section:eq(0) > ul > li''' ExtractionParameters: {[$'''div:eq(0) > div > div:eq(0) > p > a''', $'''Own Text''', $'''''', $'''タイトル'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(0)''', $'''Own Text''', $'''''', $'''著者'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(1) > p:eq(1)''', $'''Own Text''', $'''''', $'''価格'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(1) > s > div''', $'''Own Text''', $'''''', $'''定価'''], [$'''div:eq(0) > div > div:eq(0) > div:eq(2) > p:eq(1)''', $'''Own Text''', $'''''', $'''割引価格'''] } PostProcessData: False TimeoutInSeconds: 60 ExtractedData=> DataFromWebPage
+ON ERROR
+    CALL Catch
+    THROW ERROR
+END
     **ENDREGION
     Scripting.RunDotNetScript Imports: $'''System.Text.RegularExpressions''' Language: System.DotNetActionLanguageType.CSharp Script: $'''var table = new DataTable();
 table.Columns.Add(\"No.\");
@@ -42,11 +50,17 @@ foreach (DataRow row in dt.Rows)
 }
 dt = table;''' @'name:dt': DataFromWebPage @'type:dt': $'''Datatable''' @'direction:dt': $'''InOut''' @dt=> DataFromWebPage
     **REGION 出力
-    Excel.LaunchExcel.LaunchUnderExistingProcess Visible: False Instance=> ExcelInstance
-    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage.ColumnHeadersRow Column: $'''A''' Row: 1
-    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage Column: $'''A''' Row: 2
-    Excel.RenameWorksheet.RenameWorksheetWithIndex Instance: ExcelInstance Index: 1 NewName: $'''購入履歴'''
-    Excel.CloseExcel.CloseAndSaveAs Instance: ExcelInstance DocumentFormat: Excel.ExcelFormat.FromExtension DocumentPath: ExcelFile
+    BLOCK Exception
+ON BLOCK ERROR
+CALL Catch
+THROW ERROR
+END
+        Excel.LaunchExcel.LaunchUnderExistingProcess Visible: False Instance=> ExcelInstance
+        Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage.ColumnHeadersRow Column: $'''A''' Row: 1
+        Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage Column: $'''A''' Row: 2
+        Excel.RenameWorksheet.RenameWorksheetWithIndex Instance: ExcelInstance Index: 1 NewName: $'''購入履歴'''
+        Excel.CloseExcel.CloseAndSaveAs Instance: ExcelInstance DocumentFormat: Excel.ExcelFormat.FromExtension DocumentPath: ExcelFile
+    END
     WAIT (File.WaitForFile.Created File: ExcelFile)
     **ENDREGION
     @@copilotGeneratedAction: 'False'
