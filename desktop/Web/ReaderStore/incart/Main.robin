@@ -7,7 +7,7 @@ FUNCTION Main_copy GLOBAL
     SET ExcelFile TO $'''%Documents%\\ReaderStore-purchase-%FormattedDateTime%.xlsx'''
     **ENDREGION
     **REGION スクレイピング
-    WebAutomation.LaunchEdge.AttachToEdgeByTitle TabTitle: $'''カート | ソニーの電子書籍ストア -Reader Store''' AttachTimeout: 5 BrowserInstance=> Browser
+    WebAutomation.LaunchEdge.LaunchEdge Url: $'''https://ebookstore.sony.jp/cart/incart/''' WindowState: WebAutomation.BrowserWindowState.Normal ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
 ON ERROR
     CALL Catch
     THROW ERROR
@@ -17,6 +17,7 @@ ON ERROR
     CALL Catch
     THROW ERROR
 END
+    WebAutomation.CloseWebBrowser BrowserInstance: Browser
     **ENDREGION
     Scripting.RunDotNetScript Imports: $'''System.Text.RegularExpressions''' Language: System.DotNetActionLanguageType.CSharp Script: $'''var table = new DataTable();
 table.Columns.Add(\"No.\");
@@ -52,8 +53,8 @@ dt = table;''' @'name:dt': DataFromWebPage @'type:dt': $'''Datatable''' @'direct
     **REGION 出力
     BLOCK Exception
 ON BLOCK ERROR
-CALL Catch
-THROW ERROR
+    CALL Catch
+    THROW ERROR
 END
         Excel.LaunchExcel.LaunchUnderExistingProcess Visible: False Instance=> ExcelInstance
         Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: DataFromWebPage.ColumnHeadersRow Column: $'''A''' Row: 1
