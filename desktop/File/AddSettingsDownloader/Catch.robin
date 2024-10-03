@@ -1,0 +1,12 @@
+
+FUNCTION Catch GLOBAL
+    ERROR => LastError
+    CALL Now
+    Text.AppendLine Text: Log LineToAppend: $'''%CurrentDateTime% ERROR Process is failure. %LastError.Message% - %LastError.Location%''' Result=> Log
+    File.WriteText File: StoreLog TextToWrite: Log AppendNewLine: True IfFileExists: File.IfFileExists.Append Encoding: File.FileEncoding.Unicode
+    XML.WriteXmlToFile.WriteToFileFormatted File: $'''%OneDrive%%MasterFile%''' Xml: XmlDocument Encoding: XML.FileEncoding.DefaultEncoding Indentation: 2
+    ON ERROR
+
+    END
+    EXIT Code: 0 ErrorMessage: ErrorMsg
+END FUNCTION
