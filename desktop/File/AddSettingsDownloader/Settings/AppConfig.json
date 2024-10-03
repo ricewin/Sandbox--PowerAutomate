@@ -1,0 +1,6 @@
+{
+    "AppSettings": {
+        "StoreLog": "\\fslog.txt",
+        "MasterFile": "\\xxx\\xxx\\filter.xml"
+    }
+}

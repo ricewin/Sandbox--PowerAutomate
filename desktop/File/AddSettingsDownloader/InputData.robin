@@ -1,0 +1,46 @@
+
+FUNCTION InputData GLOBAL
+    @@statistics_statistics_Input_Text: '1'
+@@statistics_statistics_Action_Submit: '1'
+Display.ShowCustomDialog CardTemplateJson: '''{
+  \"type\": \"AdaptiveCard\",
+  \"version\": \"1.4\",
+  \"id\": \"AdaptiveCard\",
+  \"body\": [
+    {
+      \"type\": \"Input.Text\",
+      \"id\": \"Title\",
+      \"isMultiline\": true,
+      \"label\": \"${Title_Label}\",
+      \"spacing\": \"extraLarge\"
+    }
+  ],
+  \"actions\": [
+    {
+      \"type\": \"Action.Submit\",
+      \"id\": \"Submit\",
+      \"title\": \"${Submit_Title}\"
+    }
+  ]
+}''' CustomFormData=> CustomFormData ButtonPressed=> ButtonPressed @Title_Label: $'''タイトル''' @Submit_Title: $'''Ok'''
+    IF ButtonPressed = $'''Cancel''' THEN
+        EXIT Code: 0 ErrorMessage: $'''実行を中止します。'''
+    END
+    IF IsEmpty(CustomFormData.Title) THEN
+        EXIT Code: 0 ErrorMessage: $'''入力がありませんでした。'''
+    END
+    Text.Trim Text: CustomFormData.Title TrimOption: Text.TrimOption.Both TrimmedText=> TrimmedText
+    **REGION 半角→全角
+    /# ファイル名に使用できない文字列: \\ / : * ? " < > |
+使用できるがついでに置換する: !#/
+    Text.Replace Text: TrimmedText TextToFind: $'''/''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''／''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $''':''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''：''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $'''*''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''＊''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $'''?''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''？''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $'''<''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''＜''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $'''>''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''＞''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $'''|''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''｜''' ActivateEscapeSequences: False Result=> TrimmedText
+    Text.Replace Text: TrimmedText TextToFind: $'''!''' IsRegEx: False IgnoreCase: False ReplaceWith: $'''！''' ActivateEscapeSequences: False Result=> TrimmedText
+    **ENDREGION
+    Text.SplitText.Split Text: TrimmedText StandardDelimiter: Text.StandardDelimiter.NewLine DelimiterTimes: 1 Result=> 作品リスト
+END FUNCTION
